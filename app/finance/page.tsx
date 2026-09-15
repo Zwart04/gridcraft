@@ -2,7 +2,7 @@
 import { useApp } from '@/lib/store'
 import { useLang } from '@/lib/lang'
 import { t } from '@/lib/i18n'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Download, TrendingUp } from 'lucide-react'
 
@@ -11,18 +11,19 @@ export default function FinancePage() {
   const { financeEntries, addFinanceEntry } = useApp()
   const t_ = lang === 'en' ? t.en : t.id
   const k = t_.finance
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const seen = localStorage.getItem('gc_finance_seen')
-      if (!seen) {
-        localStorage.setItem('gc_finance_seen', '1')
-        addFinanceEntry('creative', 12.5, 'Initial project scaffolding credit')
-        addFinanceEntry('export', 1.0, 'Gallery level export fee')
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const seen = localStorage.getItem('gc_finance_seen')
+        if (!seen) {
+          localStorage.setItem('gc_finance_seen', '1')
+          addFinanceEntry('creative', 12.5, 'Initial project scaffolding credit')
+          addFinanceEntry('export', 1.0, 'Gallery level export fee')
+        }
       }
-      setReady(true)
-    }
+    }, 100)
+    return () => clearTimeout(timer)
   }, [])
 
   const total = financeEntries.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0)
@@ -32,36 +33,49 @@ export default function FinancePage() {
     return k.catSimulation
   }
 
-  const exportPdf = () => {
-    import('jspdf').then(({ jsPDF }) => {
-      const doc = new jsPDF()
-      doc.setFontSize(12)
-      doc.text(k.title, 20, 20)
-      doc.text(`${k.total}: $${total.toFixed(2)}`, 20, 40)
-      financeEntries.forEach((e: { time: string; type: string; amount: number; detail: string }, i: number) => {
-        doc.text(`${e.time} — ${catLabel(e.type)} — $${e.amount.toFixed(2)} — ${e.detail}`, 20, 60 + i * 10)
-      })
-      doc.save('gridcraft-finance-journal.pdf')
-    }).catch(console.error)
+  const exportCsv = () => {
+    const header = 'Date,Category,Amount,Detail\n'
+    const rows = financeEntries.map((e: { time: string; type: string; amount: number; detail: string }) => {
+      const d = new Date(e.time).toLocaleString()
+      const cat = catLabel(e.type)
+      const amt = e.amount.toFixed(2)
+      const det = `"${e.detail.replace(/"/g, '""')}"`
+      return `${d},${cat},${amt},${det}`
+    }).join('\n')
+    const csv = '﻿' + header + rows
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'gridcraft-finance.csv'; a.click()
+    URL.revokeObjectURL(url)
   }
 
-  const exportExcel = () => {
-    import('xlsx').then((XLSX) => {
-      const ws = XLSX.utils.json_to_sheet(financeEntries.map((e: { time: string; type: string; amount: number; detail: string }) => ({
-        date: new Date(e.time).toLocaleString(),
-        category: catLabel(e.type),
-        amount: e.amount,
-        detail: e.detail,
-      })))
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, ws, 'Finance Journal')
-      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-      const blob = new Blob([wbout], { type: 'application/octet-stream' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url; a.download = 'gridcraft-finance.xlsx'; a.click()
-      URL.revokeObjectURL(url)
-    }).catch(console.error)
+  const exportPdfText = () => {
+    const lines: string[] = [
+      'GridCraft — Finance Journal',
+      '='.repeat(40),
+      '',
+      `Total: $${total.toFixed(2)}`,
+      `Entries: ${financeEntries.length}`,
+      '',
+      '-'.repeat(80),
+      `${'Date'.padEnd(25)} ${'Category'.padEnd(20)} ${'Amount'.padEnd(10)} Detail`,
+      '-'.repeat(80),
+    ]
+    financeEntries.forEach((e: { time: string; type: string; amount: number; detail: string }) => {
+      const d = new Date(e.time).toLocaleString().slice(0, 24).padEnd(25)
+      const cat = catLabel(e.type).slice(0, 19).padEnd(20)
+      const amt = ('$' + e.amount.toFixed(2)).padEnd(10)
+      const det = e.detail
+      lines.push(`${d}${cat}${amt}${det}`)
+    })
+    lines.push('-'.repeat(80))
+    const text = lines.join('\n')
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'gridcraft-finance.txt'; a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -69,8 +83,8 @@ export default function FinancePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{k.title}</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={exportPdf}><Download size={14} className="mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={exportExcel}><Download size={14} className="mr-1" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={exportCsv}><Download size={14} className="mr-1" />CSV</Button>
+          <Button variant="outline" size="sm" onClick={exportPdfText}><Download size={14} className="mr-1" />TXT</Button>
         </div>
       </div>
 
