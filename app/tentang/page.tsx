@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function TentangRedirect() {
-  redirect('/about?lang=id')
+  useEffect(() => { window.location.replace('/about?lang=id') }, [])
+  return null
 }

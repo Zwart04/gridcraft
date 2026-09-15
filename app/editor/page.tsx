@@ -108,7 +108,7 @@ export default function EditorPage() {
       let visited = new Set<string>()
       let steps = 0
       while (pos && steps < size * size * 2) {
-        const [r, c] = pos
+        const [r, c]: [number, number] = pos!
         const key = `${r},${c}`
         if (visited.has(key)) break
         visited.add(key)
@@ -119,7 +119,7 @@ export default function EditorPage() {
         const dirs: [number, number][] = [[0, 1], [1, 0], [0, -1], [-1, 0]]
         let moved = false
         for (const [dr, dc] of dirs) {
-          const nr = r + dr, nc = c + dc
+          const nr: number = r + dr, nc: number = c + dc
           if (nr >= 0 && nr < size && nc >= 0 && nc < size && !visited.has(`${nr},${nc}`) && grid[nr][nc] !== 'wall') {
             pos = [nr, nc]; moved = true; break
           }

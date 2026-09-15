@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function GaleriRedirect() {
-  redirect('/gallery?lang=id')
+  useEffect(() => { window.location.replace('/gallery?lang=id') }, [])
+  return null
 }

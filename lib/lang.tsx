@@ -1,5 +1,6 @@
 'use client'
-import { createContext, useContext, useState, useEffect } from 'react'
+
+import { ReactNode, createContext, useContext, useState, useEffect } from 'react'
 
 type Lang = 'en' | 'id'
 
@@ -10,7 +11,7 @@ interface LangContextType {
 
 const LangContext = createContext<LangContextType | null>(null)
 
-export function LangProvider({ children }: { children: React.ReactNode }) {
+export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mounted, setMounted] = useState(false)
 
@@ -18,7 +19,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     setMounted(true)
     const stored = localStorage.getItem('gc_lang')
     if (stored === 'en' || stored === 'id') setLang(stored)
-    else if (navigator.language.startsWith('id')) setLang('id')
+    else if (typeof navigator !== 'undefined' && navigator.language.startsWith('id')) setLang('id')
   }, [])
 
   useEffect(() => {
@@ -34,6 +35,9 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
 export function useLang() {
   const ctx = useContext(LangContext)
-  if (!ctx) throw new Error('useLang must be used within LangProvider')
+  if (!ctx) {
+    // Fallback during SSR — return a safe default
+    return { lang: 'en', setLang: () => {} }
+  }
   return ctx
 }

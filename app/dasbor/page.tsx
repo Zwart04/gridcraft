@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function DasborRedirect() {
-  redirect('/dashboard?lang=id')
+  useEffect(() => { window.location.replace('/dashboard?lang=id') }, [])
+  return null
 }

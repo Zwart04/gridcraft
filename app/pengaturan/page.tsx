@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function PengaturanRedirect() {
-  redirect('/settings?lang=id')
+  useEffect(() => { window.location.replace('/settings?lang=id') }, [])
+  return null
 }

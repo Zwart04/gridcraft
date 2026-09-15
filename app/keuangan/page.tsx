@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function KeuanganRedirect() {
-  redirect('/finance?lang=id')
+  useEffect(() => { window.location.replace('/finance?lang=id') }, [])
+  return null
 }

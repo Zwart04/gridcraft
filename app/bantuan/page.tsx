@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation'
+'use client'
+import { useEffect } from 'react'
 export default function BantuanRedirect() {
-  redirect('/help?lang=id')
+  useEffect(() => { window.location.replace('/help?lang=id') }, [])
+  return null
 }

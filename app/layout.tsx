@@ -1,13 +1,11 @@
-import '@/app/globals.css'
-import { StoreProvider } from '@/lib/store'
-import { LangProvider } from '@/lib/lang'
+import type { Metadata } from "next"
+import "./globals.css"
+import { Providers } from "./providers"
 
-export const metadata = {
-  title: 'GridCraft — Collaborative Grid Editor',
-  description: 'Build game levels together in real-time. AI suggestions, GPU simulation, and export pipeline.',
-  icons: {
-    icon: '/icon.svg',
-  },
+export const metadata: Metadata = {
+  title: "GridCraft — Collaborative Grid Game Editor",
+  description: "Edit game levels together in real-time on a shared grid. AI-powered suggestions, GPU-accelerated simulation, and export to PNG, JSON, or WebM.",
+  icons: { icon: "/icon.svg" },
 }
 
 export default function RootLayout({
@@ -16,17 +14,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <StoreProvider>
-          <LangProvider>
-            {children}
-          </LangProvider>
-        </StoreProvider>
+    <html lang="en" className="light" suppressHydrationWarning>
+      <body className="min-h-screen bg-background antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

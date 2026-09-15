@@ -2,7 +2,8 @@
 const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
-  typescript: { ignoreBuildErrors: true },
-};
+  trailingSlash: true,
+  reactStrictMode: true,
+}
 
-export default nextConfig;
+module.exports = nextConfig
