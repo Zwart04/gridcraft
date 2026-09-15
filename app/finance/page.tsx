@@ -14,17 +14,19 @@ export default function FinancePage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && addFinanceEntry) {
         const seen = localStorage.getItem('gc_finance_seen')
         if (!seen) {
           localStorage.setItem('gc_finance_seen', '1')
-          addFinanceEntry('creative', 12.5, 'Initial project scaffolding credit')
-          addFinanceEntry('export', 1.0, 'Gallery level export fee')
+          try {
+            addFinanceEntry('creative', 12.5, 'Initial project scaffolding credit')
+            addFinanceEntry('export', 1.0, 'Gallery level export fee')
+          } catch {}
         }
       }
     }, 100)
     return () => clearTimeout(timer)
-  }, [])
+  }, [addFinanceEntry])
 
   const total = financeEntries.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0)
   const catLabel = (type: string) => {
