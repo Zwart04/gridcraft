@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GridCraft
+
+A collaborative, grid-based game level editor built for the web. Edit levels together in real-time, get AI-powered suggestions, run GPU-accelerated simulations with an AI agent, and export to PNG, JSON, or WebM.
+
+Live Demo: https://gridcraft.zwart.qzz.io
+GitHub: https://github.com/Zwart04/gridcraft
+
+---
+
+## Features
+
+- Real-time collaborative grid editing via BroadcastChannel with multi-user cursor presence
+- AI level suggestion engine (balance checker, symmetry suggester, flow optimizer) with throttling
+- GPU-accelerated grid simulation in a Web Worker (60fps, non-blocking)
+- Version history and auto-save every 30 seconds with one-click restore
+- Export pipeline: clean PNG (800x450), portable JSON, and WebM animation
+- Public level gallery with search, filtering, and like counter
+- Bilingual dashboard (EN/ID) with Recharts analytics and auto finance journal
+- Local-first auth with email/password validation and localStorage persistence
+
+## Tech Stack
+
+| Category | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 + custom OKLCH color system |
+| Components | shadcn/ui (Radix-based) |
+| Icons | lucide-react |
+| Charts | Recharts |
+| Export | jsPDF, xlsx (SheetJS) |
+| Real-time | BroadcastChannel API |
+| Storage | Web Worker + localStorage |
+| Deployment | Cloudflare Pages |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 22+
+- npm or yarn
+
+### Installation
+
+```bash
+git clone https://github.com/Zwart04/gridcraft.git
+cd gridcraft
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+# static export to /out
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+gridcraft/
+├── app/                   # Next.js App Router routes
+│   ├── layout.tsx         # Root layout (StoreProvider + LangProvider)
+│   ├── page.tsx           # Landing page
+│   ├── dashboard/         # Stats dashboard (Recharts + finance journal)
+│   ├── editor/            # Grid editor (collab + AI + simulation + export)
+│   ├── gallery/           # Level gallery (search + filter)
+│   ├── analytics/         # Analytics (trend, distribution, heatmap, attribution)
+│   ├── finance/           # Auto finance journal
+│   ├── settings/          # Language + theme + grid defaults
+│   ├── help/              # Editor guide + legend + shortcuts
+│   ├── about/             # About + attribution
+│   └── auth/              # Login / Register
+├── components/            # Shared UI components
+│   ├── ui/                # shadcn-style primitives
+│   ├── app-provider.tsx
+│   ├── lang-provider.tsx
+│   ├── theme-provider.tsx
+│   └── toast-provider.tsx
+├── lib/                   # Utilities, store, i18n
+├── public/                # Static assets (favicon, icons)
+├── FEATURES.md            # Full feature specification (8 features)
+└── docs/                  # Screenshots and demo assets
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Attribution
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Source attribution is handled via URL params (`?utm_source=...`) persisted to
+`localStorage.source` and visualized as a Recharts bar chart in `/analytics`.
+No third-party trackers, Meta Pixel, or Google Analytics are used.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
