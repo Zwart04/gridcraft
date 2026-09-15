@@ -2,17 +2,16 @@
 import { useApp } from '@/lib/store'
 import { useLang } from '@/lib/lang'
 import { t } from '@/lib/i18n'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileText, Download, TrendingUp } from 'lucide-react'
-import { jsPDF } from 'jspdf'
-import * as XLSX from 'xlsx'
+import { Download, TrendingUp } from 'lucide-react'
 
 export default function FinancePage() {
   const { lang } = useLang()
   const { financeEntries, addFinanceEntry } = useApp()
   const t_ = lang === 'en' ? t.en : t.id
   const k = t_.finance
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -22,10 +21,11 @@ export default function FinancePage() {
         addFinanceEntry('creative', 12.5, 'Initial project scaffolding credit')
         addFinanceEntry('export', 1.0, 'Gallery level export fee')
       }
+      setReady(true)
     }
   }, [])
 
-  const total = financeEntries.reduce((sum, e) => sum + e.amount, 0)
+  const total = financeEntries.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0)
   const catLabel = (type: string) => {
     if (type === 'creative') return k.catCreative
     if (type === 'export') return k.catExport
@@ -33,31 +33,35 @@ export default function FinancePage() {
   }
 
   const exportPdf = () => {
-    const doc = new jsPDF()
-    doc.setFontSize(12)
-    doc.text(k.title, 20, 20)
-    doc.text(`${k.total}: $${total.toFixed(2)}`, 20, 40)
-    financeEntries.forEach((e, i) => {
-      doc.text(`${e.time} — ${catLabel(e.type)} — $${e.amount.toFixed(2)} — ${e.detail}`, 20, 60 + i * 10)
-    })
-    doc.save('gridcraft-finance-journal.pdf')
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF()
+      doc.setFontSize(12)
+      doc.text(k.title, 20, 20)
+      doc.text(`${k.total}: $${total.toFixed(2)}`, 20, 40)
+      financeEntries.forEach((e: { time: string; type: string; amount: number; detail: string }, i: number) => {
+        doc.text(`${e.time} — ${catLabel(e.type)} — $${e.amount.toFixed(2)} — ${e.detail}`, 20, 60 + i * 10)
+      })
+      doc.save('gridcraft-finance-journal.pdf')
+    }).catch(console.error)
   }
 
   const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(financeEntries.map(e => ({
-      date: new Date(e.time).toLocaleString(),
-      category: catLabel(e.type),
-      amount: e.amount,
-      detail: e.detail,
-    })))
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Finance Journal')
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-    const blob = new Blob([wbout], { type: 'application/octet-stream' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = 'gridcraft-finance.xlsx'; a.click()
-    URL.revokeObjectURL(url)
+    import('xlsx').then((XLSX) => {
+      const ws = XLSX.utils.json_to_sheet(financeEntries.map((e: { time: string; type: string; amount: number; detail: string }) => ({
+        date: new Date(e.time).toLocaleString(),
+        category: catLabel(e.type),
+        amount: e.amount,
+        detail: e.detail,
+      })))
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Finance Journal')
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      const blob = new Blob([wbout], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'gridcraft-finance.xlsx'; a.click()
+      URL.revokeObjectURL(url)
+    }).catch(console.error)
   }
 
   return (
@@ -95,7 +99,7 @@ export default function FinancePage() {
               </tr>
             </thead>
             <tbody>
-              {financeEntries.map((e) => (
+              {financeEntries.map((e: { id: string; time: string; type: string; amount: number; detail: string }) => (
                 <tr key={e.id} className="border-b">
                   <td className="p-3 text-muted-foreground">{new Date(e.time).toLocaleString()}</td>
                   <td className="p-3">{catLabel(e.type)}</td>
