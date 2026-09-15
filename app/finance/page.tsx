@@ -2,7 +2,7 @@
 import { useApp } from '@/lib/store'
 import { useLang } from '@/lib/lang'
 import { t } from '@/lib/i18n'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FileText, Download, TrendingUp } from 'lucide-react'
 
@@ -11,6 +11,7 @@ export default function FinancePage() {
   const { financeEntries, addFinanceEntry } = useApp()
   const t_ = lang === 'en' ? t.en : t.id
   const k = t_.finance
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -30,34 +31,46 @@ export default function FinancePage() {
     return k.catSimulation
   }
 
-  const exportPdf = () => {
-    const { jsPDF } = require('jspdf')
-    const doc = new jsPDF()
-    doc.setFontSize(12)
-    doc.text(k.title, 20, 20)
-    doc.text(`${k.total}: $${total.toFixed(2)}`, 20, 40)
-    financeEntries.forEach((e, i) => {
-      doc.text(`${e.time} — ${catLabel(e.type)} — $${e.amount.toFixed(2)} — ${e.detail}`, 20, 60 + i * 10)
-    })
-    doc.save('gridcraft-finance-journal.pdf')
+  const exportPdf = async () => {
+    setExporting(true)
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      doc.setFontSize(12)
+      doc.text(k.title, 20, 20)
+      doc.text(`${k.total}: $${total.toFixed(2)}`, 20, 40)
+      financeEntries.forEach((e, i) => {
+        doc.text(`${e.time} — ${catLabel(e.type)} — $${e.amount.toFixed(2)} — ${e.detail}`, 20, 60 + i * 10)
+      })
+      doc.save('gridcraft-finance-journal.pdf')
+    } catch (e) {
+      console.error('PDF export error:', e)
+    }
+    setExporting(false)
   }
 
-  const exportExcel = () => {
-    const XLSX = require('xlsx')
-    const ws = XLSX.utils.json_to_sheet(financeEntries.map(e => ({
-      date: new Date(e.time).toLocaleString(),
-      category: catLabel(e.type),
-      amount: e.amount,
-      detail: e.detail,
-    })))
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Finance Journal')
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-    const blob = new Blob([wbout], { type: 'application/octet-stream' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = 'gridcraft-finance.xlsx'; a.click()
-    URL.revokeObjectURL(url)
+  const exportExcel = async () => {
+    setExporting(true)
+    try {
+      const XLSX = await import('xlsx')
+      const ws = XLSX.utils.json_to_sheet(financeEntries.map(e => ({
+        date: new Date(e.time).toLocaleString(),
+        category: catLabel(e.type),
+        amount: e.amount,
+        detail: e.detail,
+      })))
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Finance Journal')
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      const blob = new Blob([wbout], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'gridcraft-finance.xlsx'; a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      console.error('Excel export error:', e)
+    }
+    setExporting(false)
   }
 
   return (
@@ -65,8 +78,8 @@ export default function FinancePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{k.title}</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={exportPdf}><Download size={14} className="mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={exportExcel}><Download size={14} className="mr-1" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}><Download size={14} className="mr-1" />{exporting ? '...' : 'PDF'}</Button>
+          <Button variant="outline" size="sm" onClick={exportExcel} disabled={exporting}><Download size={14} className="mr-1" />{exporting ? '...' : 'Excel'}</Button>
         </div>
       </div>
 
