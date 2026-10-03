@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "npm run typecheck",
+    "typecheck": "tsc --noEmit",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -29,7 +32,7 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.511.0",
-    "next": "^16.3.5",
+    "next": "16.3.8",
     "react": "^19.3.0",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.3.0",
@@ -46,11 +49,13 @@
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.6.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^15.3.5",
+    "eslint-config-next": "16.3.8",
     "playwright": "^1.63.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@opennextjs/cloudflare": "1.20.8",
+    "wrangler": "4.147.0"
   },
   "description": "A collaborative, grid-based game level editor built for the web. Edit levels together in real-time, get AI-powered suggestions, run GPU-accelerated simulations with an AI agent, and export to PNG, JSON, or WebM.",
   "main": "get-pool-name.js",
