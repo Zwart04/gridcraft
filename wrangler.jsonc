@@ -24,6 +24,10 @@
     {
       "pattern": "gridcraft-app.zwart.qzz.io",
       "custom_domain": true
+    },
+    {
+      "pattern": "shaderforge-app.zwart.qzz.io",
+      "custom_domain": true
     }
   ]
 }
